@@ -16,7 +16,6 @@ import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.GL11;
 
-import com.caedis.duradisplay.render.DurabilityRenderer;
 import com.mojang.realmsclient.gui.ChatFormatting;
 
 import betterquesting.api.client.gui.misc.IVolatileScreen;
@@ -182,7 +181,6 @@ public class GuiScreenCanvas extends GuiScreen implements IScene {
 
         if (useDefaultBG) this.drawDefaultBackground();
 
-        if (BetterQuesting.isDuraDisplayLoaded) DurabilityRenderer.Execute = false; // GuiScreen sets this back to true
         GL11.glPushMatrix();
         GL11.glColor4f(1F, 1F, 1F, 1F);
         GL11.glDisable(GL11.GL_DEPTH_TEST);
@@ -194,7 +192,6 @@ public class GuiScreenCanvas extends GuiScreen implements IScene {
         if (tt != null && !tt.isEmpty()) {
             this.drawHoveringText(tt, mx, my, mc.fontRenderer);
         }
-        if (BetterQuesting.isDuraDisplayLoaded) DurabilityRenderer.Execute = true;
 
         GL11.glEnable(GL11.GL_DEPTH_TEST);
         GL11.glPopMatrix();
