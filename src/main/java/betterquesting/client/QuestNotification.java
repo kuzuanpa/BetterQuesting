@@ -3,7 +3,9 @@ package betterquesting.client;
 import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
+import betterquesting.questing.QuestDatabase;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.audio.PositionedSoundRecord;
 import net.minecraft.item.ItemStack;
@@ -58,8 +60,7 @@ public class QuestNotification {
             }
             notice.init = true;
             notice.startTime = Minecraft.getSystemTime();
-            mc.getSoundHandler()
-                .playSound(PositionedSoundRecord.func_147674_a(new ResourceLocation(notice.sound), 1.0F));
+            mc.getSoundHandler().playSound(PositionedSoundRecord.func_147674_a(new ResourceLocation(notice.sound), 1.0F));
         }
 
         if (notice.getTime() >= 6F) {
@@ -92,7 +93,14 @@ public class QuestNotification {
                 + QuestTranslation.translate(notice.mainTxt);
             int txtW = RenderUtils.getStringWidth(tmp, mc.fontRenderer);
             mc.fontRenderer.drawString(tmp, width / 2 - txtW / 2, height / 4, color, true);
-            tmp = QuestTranslation.translate(notice.subTxt);
+
+            if(notice.subTxt != null && notice.subTxt.startsWith("qName.")) {
+                //get Quest UUID and translate to Quest Name
+                UUID uuid = UUID.fromString(notice.subTxt.replace("qName.",""));
+                tmp = QuestTranslation.translateQuestName(uuid, QuestDatabase.INSTANCE.get(uuid));
+            } else
+                tmp = notice.subTxt; //default translate for other notices though I didn't find
+
             txtW = RenderUtils.getStringWidth(tmp, mc.fontRenderer);
             mc.fontRenderer.drawString(tmp, width / 2 - txtW / 2, height / 4 + 12, color, true);
             GL11.glColor4f(1F, 1F, 1F, 1F);

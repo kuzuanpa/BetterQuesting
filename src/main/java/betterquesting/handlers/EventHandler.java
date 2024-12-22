@@ -263,7 +263,7 @@ public class EventHandler {
                     com.add(entry.getKey());
                     if (!entry.getValue()
                         .getProperty(NativeProps.SILENT)) {
-                        postPresetNotice(entry.getValue(), player, 2);
+                        postPresetNotice(entry.getKey(), player, 2);
                     }
                 }
             }
@@ -277,21 +277,21 @@ public class EventHandler {
             long totalTime = System.currentTimeMillis();
 
             for (QResetTime rTime : pendingResets) {
-                IQuest entry = QuestDatabase.INSTANCE.get(rTime.questID);
+                IQuest quest = QuestDatabase.INSTANCE.get(rTime.questID);
 
-                if (totalTime >= rTime.time && !entry.canSubmit(player)) // REEEEEEEEEset
+                if (totalTime >= rTime.time && !quest.canSubmit(player)) // REEEEEEEEEset
                 {
-                    if (entry.getProperty(NativeProps.GLOBAL)) {
-                        entry.resetUser(null, false);
+                    if (quest.getProperty(NativeProps.GLOBAL)) {
+                        quest.resetUser(null, false);
                     } else {
-                        entry.resetUser(uuid, false);
+                        quest.resetUser(uuid, false);
                     }
 
                     refreshCache = true;
                     qc.markQuestDirty(rTime.questID);
                     res.add(rTime.questID);
-                    if (!entry.getProperty(NativeProps.SILENT)) {
-                        postPresetNotice(entry, player, 1);
+                    if (!quest.getProperty(NativeProps.SILENT)) {
+                        postPresetNotice(rTime.questID, player, 1);
                     }
                 } else {
                     break; // Entries are sorted by time so we fail fast and skip checking the others
@@ -330,12 +330,15 @@ public class EventHandler {
     }
 
     // TODO: Create a new message inbox system for these things. On screen popups aren't ideal in combat
-    private static void postPresetNotice(IQuest quest, EntityPlayer player, int preset) {
+    private static void postPresetNotice(UUID uuid, EntityPlayer player, int preset) {
         if (!(player instanceof EntityPlayerMP)) return;
+        IQuest quest = QuestDatabase.INSTANCE.get(uuid);
+        if(quest == null) return;
+
         ItemStack icon = quest.getProperty(NativeProps.ICON)
             .getBaseStack();
         String mainText = "";
-        String subText = quest.getProperty(NativeProps.NAME);
+        String subText = "qName."+uuid.toString();
         String sound = "";
 
         switch (preset) {

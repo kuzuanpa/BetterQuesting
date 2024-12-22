@@ -90,7 +90,7 @@ public abstract class CanvasSearch<T, E> extends CanvasScrolling {
         searchTime.reset()
             .start();
 
-        while (!pendingResults.isEmpty() && searchTime.elapsed(TimeUnit.MILLISECONDS) < 100) {
+        while (!pendingResults.isEmpty() && searchTime.elapsed(TimeUnit.MILLISECONDS) < 100 && searchIdx < 32) {
             if (addResult(pendingResults.poll(), searchIdx, resultWidth)) searchIdx++;
         }
 
