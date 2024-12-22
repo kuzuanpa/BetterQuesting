@@ -100,7 +100,7 @@ public class GuiItemSelection extends GuiScreenCanvas implements IPEventListener
             "",
             FieldFilterString.INSTANCE);
         searchBox.setCallback(cvDatabase::setSearchFilter)
-            .setWatermark("Search...");
+            .setWatermark("Search... (Only show first 64 results)");
         cvRight.addPanel(searchBox);
 
         PanelVScrollBar scEdit = new PanelVScrollBar(
