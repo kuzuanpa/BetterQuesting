@@ -102,17 +102,19 @@ public class QuestInstance implements IQuest {
 
         int done = 0;
 
+        int ignored = 0;
         for (DBEntry<ITask> entry : tasks.getEntries()) {
-            if (entry.getValue()
-                .isComplete(playerID)
-                || entry.getValue()
-                    .ignored(playerID)) {
+            if(entry.getValue().ignored(playerID)){
+                ignored++;
+                continue;
+            }
+            if (entry.getValue().isComplete(playerID)) {
                 done++;
             }
         }
 
         if (tasks.size() <= 0 || qInfo.getProperty(NativeProps.LOGIC_TASK)
-            .getResult(done, tasks.size())) {
+            .getResult(done, tasks.size() - ignored)) {
             setComplete(playerID, System.currentTimeMillis());
         } else if (done > 0 && qInfo.getProperty(NativeProps.SIMULTANEOUS)) // TODO: There is actually an exploit here
                                                                             // to do with locked progression bypassing
