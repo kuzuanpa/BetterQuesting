@@ -18,6 +18,7 @@ import net.minecraft.event.ClickEvent;
 import net.minecraft.event.HoverEvent;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.network.play.client.C16PacketClientStatus;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.integrated.IntegratedServer;
 import net.minecraft.server.management.UserListBansEntry;
@@ -100,6 +101,9 @@ public class EventHandler {
     public void onKey(InputEvent.KeyInputEvent event) {
         if (BQ_Keybindings.openQuests.isPressed()) {
             Minecraft mc = Minecraft.getMinecraft();
+            //Changed in Mixin
+            mc.getNetHandler().addToSendQueue(new C16PacketClientStatus(C16PacketClientStatus.EnumState.OPEN_INVENTORY_ACHIEVEMENT));
+
             if (mc.thePlayer.isSneaking() && mc.thePlayer.getCommandSenderName()
                 .equalsIgnoreCase("Funwayguy")) {
                 mc.displayGuiScreen(new GuiScreenTest(mc.currentScreen));
