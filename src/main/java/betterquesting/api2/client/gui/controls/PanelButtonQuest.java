@@ -12,9 +12,9 @@ import javax.annotation.Nullable;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.EnumChatFormatting;
 
 import com.google.common.collect.Maps;
-import com.mojang.realmsclient.gui.ChatFormatting;
 
 import betterquesting.api.api.ApiReference;
 import betterquesting.api.api.QuestingAPI;
@@ -54,8 +54,9 @@ public class PanelButtonQuest extends PanelButtonStorage<Map.Entry<UUID, IQuest>
         player = Minecraft.getMinecraft().thePlayer;
 
         if (value == null) {
-            IQuest dummyQuest = new QuestInstance();
-            value = Maps.immutableEntry(UUID.randomUUID(), dummyQuest);
+            value = Maps.immutableEntry(UUID.randomUUID(), new QuestInstance());
+        } else if (value.getValue() == null) {
+            value.setValue(new QuestInstance());
         }
 
         EnumQuestState qState = value.getValue()
@@ -156,12 +157,13 @@ public class PanelButtonQuest extends PanelButtonStorage<Map.Entry<UUID, IQuest>
         UUID playerID = QuestingAPI.getQuestingUUID(player);
 
         if (quest.isComplete(playerID)) {
-            list.add(ChatFormatting.GREEN + QuestTranslation.translate("betterquesting.tooltip.complete"));
+            list.add(EnumChatFormatting.GREEN + QuestTranslation.translate("betterquesting.tooltip.complete"));
 
             if (quest.canClaimBasically(player)) {
-                list.add(ChatFormatting.GRAY + QuestTranslation.translate("betterquesting.tooltip.rewards_pending"));
+                list.add(
+                    EnumChatFormatting.GRAY + QuestTranslation.translate("betterquesting.tooltip.rewards_pending"));
             } else if (!quest.hasClaimed(playerID)) {
-                list.add(ChatFormatting.GRAY + QuestTranslation.translate("betterquesting.tooltip.repeatable"));
+                list.add(EnumChatFormatting.GRAY + QuestTranslation.translate("betterquesting.tooltip.repeatable"));
             } else if (quest.getProperty(NativeProps.REPEAT_TIME) > 0) {
                 long time = getRepeatSeconds(quest, player);
                 DecimalFormat df = new DecimalFormat("00");
@@ -179,17 +181,18 @@ public class PanelButtonQuest extends PanelButtonStorage<Map.Entry<UUID, IQuest>
 
                 timeTxt += df.format(time % 60) + "s";
 
-                list.add(ChatFormatting.GRAY + QuestTranslation.translate("betterquesting.tooltip.repeat", timeTxt));
+                list.add(
+                    EnumChatFormatting.GRAY + QuestTranslation.translate("betterquesting.tooltip.repeat", timeTxt));
                 if (QuestSettings.INSTANCE.getProperty(NativeProps.EDIT_MODE)) {
                     list.add(
-                        ChatFormatting.RED
+                        EnumChatFormatting.RED
                             + QuestTranslation.translate("betterquesting.tooltip.repeat_with_edit_mode"));
                 }
             }
         } else if (!quest.isUnlocked(playerID)) {
             list.add(
-                ChatFormatting.RED + ""
-                    + ChatFormatting.UNDERLINE
+                EnumChatFormatting.RED + ""
+                    + EnumChatFormatting.UNDERLINE
                     + QuestTranslation.translate("betterquesting.tooltip.requires")
                     + " ("
                     + quest.getProperty(NativeProps.LOGIC_QUEST)
@@ -204,7 +207,7 @@ public class PanelButtonQuest extends PanelButtonStorage<Map.Entry<UUID, IQuest>
                 .filter(
                     entry -> !entry.getValue()
                         .isComplete(playerID))
-                .forEach(entry -> list.add(ChatFormatting.RED + "- " + QuestTranslation.translateQuestName(entry)));
+                .forEach(entry -> list.add(EnumChatFormatting.RED + "- " + QuestTranslation.translateQuestName(entry)));
         } else {
             int n = 0;
 
@@ -217,7 +220,7 @@ public class PanelButtonQuest extends PanelButtonStorage<Map.Entry<UUID, IQuest>
             }
 
             list.add(
-                ChatFormatting.GRAY + QuestTranslation.translate(
+                EnumChatFormatting.GRAY + QuestTranslation.translate(
                     "betterquesting.tooltip.tasks_complete",
                     n,
                     quest.getTasks()
@@ -231,24 +234,24 @@ public class PanelButtonQuest extends PanelButtonStorage<Map.Entry<UUID, IQuest>
         List<String> list = new ArrayList<>();
 
         list.add(
-            ChatFormatting.GRAY + QuestTranslation
+            EnumChatFormatting.GRAY + QuestTranslation
                 .translate("betterquesting.tooltip.global_quest", quest.getProperty(NativeProps.GLOBAL)));
         if (quest.getProperty(NativeProps.GLOBAL)) {
             list.add(
-                ChatFormatting.GRAY + QuestTranslation
+                EnumChatFormatting.GRAY + QuestTranslation
                     .translate("betterquesting.tooltip.global_share", quest.getProperty(NativeProps.GLOBAL_SHARE)));
         }
         list.add(
-            ChatFormatting.GRAY + QuestTranslation.translate(
+            EnumChatFormatting.GRAY + QuestTranslation.translate(
                 "betterquesting.tooltip.quest_logic",
                 quest.getProperty(NativeProps.LOGIC_QUEST)
                     .toString()
                     .toUpperCase()));
         list.add(
-            ChatFormatting.GRAY + QuestTranslation
+            EnumChatFormatting.GRAY + QuestTranslation
                 .translate("betterquesting.tooltip.simultaneous", quest.getProperty(NativeProps.SIMULTANEOUS)));
         list.add(
-            ChatFormatting.GRAY + QuestTranslation
+            EnumChatFormatting.GRAY + QuestTranslation
                 .translate("betterquesting.tooltip.auto_claim", quest.getProperty(NativeProps.AUTO_CLAIM)));
         if (quest.getProperty(NativeProps.REPEAT_TIME) >= 0) {
             long time = quest.getProperty(NativeProps.REPEAT_TIME) / 20;
@@ -263,9 +266,9 @@ public class PanelButtonQuest extends PanelButtonStorage<Map.Entry<UUID, IQuest>
 
             timeTxt += df.format(time % 60) + "s";
 
-            list.add(ChatFormatting.GRAY + QuestTranslation.translate("betterquesting.tooltip.repeat", timeTxt));
+            list.add(EnumChatFormatting.GRAY + QuestTranslation.translate("betterquesting.tooltip.repeat", timeTxt));
         } else {
-            list.add(ChatFormatting.GRAY + QuestTranslation.translate("betterquesting.tooltip.repeat", false));
+            list.add(EnumChatFormatting.GRAY + QuestTranslation.translate("betterquesting.tooltip.repeat", false));
         }
 
         return list;

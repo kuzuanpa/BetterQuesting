@@ -33,25 +33,26 @@ public class NetQuestAction {
 
     @SideOnly(Side.CLIENT)
     public static void requestClaim(@Nonnull Collection<UUID> questIDs) {
-        if (questIDs.isEmpty()) {
-            return;
-        }
-
-        NBTTagCompound payload = new NBTTagCompound();
-        payload.setInteger("action", 0);
-        payload.setTag("questIDs", NBTConverter.UuidValueType.QUEST.writeIds(questIDs));
-
-        PacketSender.INSTANCE.sendToServer(new QuestingPacket(ID_NAME, payload));
+        sendPacket(questIDs, 0);
     }
 
     @SideOnly(Side.CLIENT)
     public static void requestDetect(@Nonnull Collection<UUID> questIDs) {
+        sendPacket(questIDs, 1);
+    }
+
+    @SideOnly(Side.CLIENT)
+    public static void requestClaimForced(@Nonnull Collection<UUID> questIDs) {
+        sendPacket(questIDs, 2);
+    }
+
+    private static void sendPacket(@Nonnull Collection<UUID> questIDs, int actionCode) {
         if (questIDs.isEmpty()) {
             return;
         }
 
         NBTTagCompound payload = new NBTTagCompound();
-        payload.setInteger("action", 1);
+        payload.setInteger("action", actionCode);
         payload.setTag("questIDs", NBTConverter.UuidValueType.QUEST.writeIds(questIDs));
 
         PacketSender.INSTANCE.sendToServer(new QuestingPacket(ID_NAME, payload));
@@ -75,6 +76,10 @@ public class NetQuestAction {
                 detectQuest(getQuestIDs.get(), message.getSecond());
                 break;
             }
+            case 2: {
+                forceClaimQuest(getQuestIDs.get(), message.getSecond());
+                break;
+            }
             default: {
                 BetterQuesting.logger.log(
                     Level.ERROR,
@@ -96,5 +101,11 @@ public class NetQuestAction {
         QuestDatabase.INSTANCE.filterKeys(questIDs)
             .values()
             .forEach(q -> q.detect(player));
+    }
+
+    public static void forceClaimQuest(Collection<UUID> questIDs, EntityPlayerMP player) {
+        QuestDatabase.INSTANCE.getAll(questIDs)
+            .filter(q -> q.canClaim(player, true))
+            .forEach(q -> q.claimReward(player, true));
     }
 }

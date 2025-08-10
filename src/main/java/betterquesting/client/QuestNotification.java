@@ -7,7 +7,7 @@ import java.util.UUID;
 
 import betterquesting.questing.QuestDatabase;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.audio.PositionedSoundRecord;
+import net.minecraft.client.audio.PositionedSound;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.MathHelper;
@@ -16,6 +16,7 @@ import net.minecraftforge.client.event.RenderGameOverlayEvent;
 
 import org.lwjgl.opengl.GL11;
 
+import betterquesting.api.properties.NativeProps;
 import betterquesting.api.storage.BQ_Settings;
 import betterquesting.api.utils.RenderUtils;
 import betterquesting.api2.utils.QuestTranslation;
@@ -60,7 +61,10 @@ public class QuestNotification {
             }
             notice.init = true;
             notice.startTime = Minecraft.getSystemTime();
-            mc.getSoundHandler().playSound(PositionedSoundRecord.func_147674_a(new ResourceLocation(notice.sound), 1.0F));
+            // lower volume for default xp jingle, standard volume for custom sounds
+            float volume = notice.sound.equals(NativeProps.SOUND_COMPLETE.getDefault()) ? 0.25f : 1f;
+            mc.getSoundHandler()
+                .playSound(new QuestCompleteSound(new ResourceLocation(notice.sound), volume));
         }
 
         if (notice.getTime() >= 6F) {
@@ -84,6 +88,7 @@ public class QuestNotification {
 
             if (notice.icon != null) {
                 RenderUtils.RenderItemStack(mc, notice.icon, width / 2 - 8, height / 4 - 20, "", color);
+                GL11.glEnable(GL11.GL_DEPTH_TEST);
             }
 
             GL11.glEnable(GL11.GL_BLEND);
@@ -93,14 +98,7 @@ public class QuestNotification {
                 + QuestTranslation.translate(notice.mainTxt);
             int txtW = RenderUtils.getStringWidth(tmp, mc.fontRenderer);
             mc.fontRenderer.drawString(tmp, width / 2 - txtW / 2, height / 4, color, true);
-
-            if(notice.subTxt != null && notice.subTxt.startsWith("qName.")) {
-                //get Quest UUID and translate to Quest Name
-                UUID uuid = UUID.fromString(notice.subTxt.replace("qName.",""));
-                tmp = QuestTranslation.translateQuestName(uuid, QuestDatabase.INSTANCE.get(uuid));
-            } else
-                tmp = notice.subTxt; //default translate for other notices though I didn't find
-
+            tmp = QuestTranslation.translate(notice.subTxt);
             txtW = RenderUtils.getStringWidth(tmp, mc.fontRenderer);
             mc.fontRenderer.drawString(tmp, width / 2 - txtW / 2, height / 4 + 12, color, true);
             GL11.glColor4f(1F, 1F, 1F, 1F);
@@ -130,4 +128,18 @@ public class QuestNotification {
         }
     }
 
+    public static class QuestCompleteSound extends PositionedSound {
+
+        public QuestCompleteSound(ResourceLocation resource, float volume) {
+            super(resource);
+            this.volume = volume;
+            this.field_147663_c = 1; // Pitch
+            this.xPosF = 0;
+            this.yPosF = 0;
+            this.zPosF = 0;
+            this.repeat = false;
+            this.field_147665_h = 0; // Repeat time
+            this.field_147666_i = AttenuationType.NONE;
+        }
+    }
 }
