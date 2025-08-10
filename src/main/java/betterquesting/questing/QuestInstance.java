@@ -241,9 +241,9 @@ public class QuestInstance implements IQuest {
         Map.Entry<UUID, IQuest> mapEntry = Maps.immutableEntry(questID, this);
         for (DBEntry<IReward> rew : rewards.getEntries()) {
             IReward unwrapped = rew.getValue();
-            if (forceChoice && unwrapped instanceof RewardChoice choiceReward) {
+            if (forceChoice && unwrapped instanceof RewardChoice) {
                 // Force a randomly selected choice reward
-                choiceReward.selectRandomChoice(player);
+                ((RewardChoice)unwrapped).selectRandomChoice(player);
             }
             unwrapped.claimReward(player, mapEntry);
         }
