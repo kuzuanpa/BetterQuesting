@@ -61,6 +61,7 @@ import betterquesting.api2.client.gui.GuiScreenTest;
 import betterquesting.api2.client.gui.themes.gui_args.GArgsNone;
 import betterquesting.api2.client.gui.themes.presets.PresetGUIs;
 import betterquesting.api2.storage.DBEntry;
+import betterquesting.api2.utils.QuestTranslation;
 import betterquesting.client.BQ_Keybindings;
 import betterquesting.client.BookmarkHandler;
 import betterquesting.client.gui2.GuiHome;
@@ -267,7 +268,7 @@ public class EventHandler {
                     com.add(entry.getKey());
                     if (!entry.getValue()
                         .getProperty(NativeProps.SILENT)) {
-                        postPresetNotice(entry.getKey(), player, 2);
+                        postPresetNotice(entry.getValue(), player, 2);
                     }
                 }
             }
@@ -281,21 +282,21 @@ public class EventHandler {
             long totalTime = System.currentTimeMillis();
 
             for (QResetTime rTime : pendingResets) {
-                IQuest quest = QuestDatabase.INSTANCE.get(rTime.questID);
+                IQuest entry = QuestDatabase.INSTANCE.get(rTime.questID);
 
-                if (totalTime >= rTime.time && !quest.canSubmit(player)) // REEEEEEEEEset
+                if (totalTime >= rTime.time && !entry.canSubmit(player)) // REEEEEEEEEset
                 {
-                    if (quest.getProperty(NativeProps.GLOBAL)) {
-                        quest.resetUser(null, false);
+                    if (entry.getProperty(NativeProps.GLOBAL)) {
+                        entry.resetUser(null, false);
                     } else {
-                        quest.resetUser(uuid, false);
+                        entry.resetUser(uuid, false);
                     }
 
                     refreshCache = true;
                     qc.markQuestDirty(rTime.questID);
                     res.add(rTime.questID);
-                    if (!quest.getProperty(NativeProps.SILENT)) {
-                        postPresetNotice(rTime.questID, player, 1);
+                    if (!entry.getProperty(NativeProps.SILENT)) {
+                        postPresetNotice(entry, player, 1);
                     }
                 } else {
                     break; // Entries are sorted by time so we fail fast and skip checking the others
@@ -334,15 +335,14 @@ public class EventHandler {
     }
 
     // TODO: Create a new message inbox system for these things. On screen popups aren't ideal in combat
-    private static void postPresetNotice(UUID uuid, EntityPlayer player, int preset) {
+    private static void postPresetNotice(IQuest quest, EntityPlayer player, int preset) {
         if (!(player instanceof EntityPlayerMP)) return;
-        IQuest quest = QuestDatabase.INSTANCE.get(uuid);
-        if(quest == null) return;
-
         ItemStack icon = quest.getProperty(NativeProps.ICON)
             .getBaseStack();
+        UUID questId = QuestDatabase.INSTANCE.lookupKey(quest);
+        String questName = QuestTranslation.translateQuestName(questId, quest);
         String mainText = "";
-        String subText = "qName."+uuid.toString();
+        String subText = questName == null ? quest.getProperty(NativeProps.NAME) : questName;
         String sound = "";
 
         switch (preset) {
